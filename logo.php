@@ -27,7 +27,15 @@
     $col_fore_R = mt_rand($col_min, $col_max);
     $col_fore_G = mt_rand($col_min, $col_max);
     $col_fore_B = mt_rand($col_min, $col_max);
-    $color_foreground = imagecolorallocate($img, $col_fore_R, $col_fore_G, $col_fore_B);
+    $color_foreground[0] = imagecolorallocate($img, $col_fore_R, $col_fore_G, $col_fore_B);
+    $foreground_colors = mt_rand(1, 2);
+    if($foreground_colors == 2){
+        // generate third color
+        $col_third_R = mt_rand($col_min, $col_max);
+        $col_third_G = mt_rand($col_min, $col_max);
+        $col_third_B = mt_rand($col_min, $col_max);
+        $color_foreground[1] = imagecolorallocate($img, $col_third_R, $col_third_G, $col_third_B);
+    }
     // generate eyes color
     $col_eyes_R = min(255, 255 + $col_min - (($col_back_R + $col_fore_R) / 2));
     $col_eyes_G = min(255, 255 + $col_min - (($col_back_G + $col_fore_G) / 2));
@@ -116,9 +124,10 @@
                 $pattern_matrix[$x][$y] = $pattern_matrix[$mat_w - $x][$y];
             }
 
-            if( !$pixel_mirrored && mt_rand(0, 1) )
+            $rand_col =  mt_rand(0, $foreground_colors);
+            if( !$pixel_mirrored && $rand_col > 0)
             {
-                $pattern_matrix[$x][$y] = 1;
+                $pattern_matrix[$x][$y] = $rand_col;
             }
         }
     }
@@ -152,7 +161,8 @@
             if(imagecolorsforindex( $mask, imagecolorat( $mask, $x, $y ) )['alpha'] == 0)
             {
                 // apply mask: using bg or fore colors
-                if($pattern_matrix[($x/$mod_size)%$mat_w][($y/$mod_size)%$mat_h] == 1) imagesetpixel( $img_masked, $x, $y, $color_foreground);
+                $pattern_value = $pattern_matrix[($x/$mod_size)%$mat_w][($y/$mod_size)%$mat_h];
+                if($pattern_value > 0) imagesetpixel( $img_masked, $x, $y, $color_foreground[$pattern_value - 1]);
                 else imagesetpixel( $img_masked, $x, $y, imagecolorat( $img, $x, $y ) );
 
                 // apply shades
