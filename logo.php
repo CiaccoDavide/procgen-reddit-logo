@@ -48,6 +48,14 @@
         max(0, $col_eyes_G - $eyes_shadow),
         max(0, $col_eyes_B - $eyes_shadow)
     );
+    // generate outline glow color
+    $tmp_min = $col_min;
+    $col_outglow_R = mt_rand($col_min, $col_max);
+    if($col_outglow_R < $tmp_min*1.5) $tmp_min *= 1.5;
+    $col_outglow_G = mt_rand($tmp_min, $col_max);
+    if($col_outglow_G < $tmp_min*1.5) $tmp_min *= 1.5;
+    $col_outglow_B = mt_rand($tmp_min, $col_max);
+    $outline_glow_color = imagecolorallocatealpha($img, $col_outglow_R, $col_outglow_G, $col_outglow_B, 70);
 
     // backround color
     imagefilledrectangle($img, 0, 0, $width, $height, $color_background);
@@ -136,6 +144,8 @@
     $mask = imagecreatefrompng('img/mask.png');
     // load shades image
     $border = imagecreatefrompng('img/greyscale_borders.png');
+    // load outline glow image
+    $outline_glow = imagecreatefrompng('img/outline_glow.png');
     // TODO: hardcode the mask and the shades inside an array (like the eyes one)
 
     // create masked image
@@ -175,6 +185,11 @@
                     max(0, $color_masked[ 'green' ] - $alphaz),
                     max(0, $color_masked[ 'blue' ] - $alphaz)
                 ) );
+            }
+            else if(imagecolorsforindex( $outline_glow, imagecolorat( $outline_glow, $x, $y ) )['alpha'] == 0)
+            {
+                // draw outline glow
+                imagesetpixel( $img_masked, $x, $y, $outline_glow_color);
             }
             else
             {
